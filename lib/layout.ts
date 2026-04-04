@@ -107,7 +107,7 @@ export function buildLayout(images: ImageEntry[]): LayoutBlock[] {
         imagesSinceBreak += 2
         lastType = 'asymmetricPair'
       } else {
-        // After asymmetricPair — split into two singles
+        // After asymmetricPair — split into two centered singles
         blocks.push({ type: 'centeredSingle', images: [item.imgs[0]] })
         imagesSinceBreak += 1
         lastType = 'centeredSingle'
@@ -116,9 +116,9 @@ export function buildLayout(images: ImageEntry[]): LayoutBlock[] {
           lastType = 'chapterBreak'
           imagesSinceBreak = 0
         }
-        blocks.push({ type: 'pair', images: [item.imgs[1], item.imgs[0]] })
+        blocks.push({ type: 'hero', images: [item.imgs[1]] })
         imagesSinceBreak += 1
-        lastType = 'pair'
+        lastType = 'hero'
       }
     } else {
       const img = item.img
