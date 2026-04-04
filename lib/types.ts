@@ -10,9 +10,9 @@ export interface ImageEntry {
   sequenceId: string | null
 }
 
-export interface SequenceEntry {
-  id: string
-  coverImageId: string
-  imageIds: string[]
-  restImageIds?: string[]
+export type BlockType = 'hero' | 'pair' | 'centeredSingle' | 'asymmetricPair' | 'chapterBreak'
+
+export interface LayoutBlock {
+  type: BlockType
+  images: ImageEntry[]
 }
