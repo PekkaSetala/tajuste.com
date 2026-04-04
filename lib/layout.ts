@@ -13,11 +13,14 @@ function classify(img: ImageEntry): ImageClass {
 }
 
 const CHAPTER_MIN = 8
-const CHAPTER_MAX = 12
+
+type SeqItem =
+  | { type: 'single'; img: ImageEntry }
+  | { type: 'portraitPair'; imgs: [ImageEntry, ImageEntry]; asymmetric: boolean }
 
 // Pre-pair portraits so none appear solo.
-// Returns an interleaved sequence of singles and portrait pairs.
-function prepareSequence(images: ImageEntry[]): Array<{ type: 'single'; img: ImageEntry } | { type: 'portraitPair'; imgs: [ImageEntry, ImageEntry] }> {
+// Marks pairs as asymmetric when aspect ratios differ significantly.
+function prepareSequence(images: ImageEntry[]): SeqItem[] {
   const portraits: ImageEntry[] = []
   const others: ImageEntry[] = []
 
@@ -26,31 +29,31 @@ function prepareSequence(images: ImageEntry[]): Array<{ type: 'single'; img: Ima
     else others.push(img)
   }
 
-  // Pair portraits together. If odd count, last one pairs with the nearest-ratio partner.
-  const pairs: [ImageEntry, ImageEntry][] = []
   // Sort by aspect ratio so similar ratios get paired
   portraits.sort((a, b) => a.aspectRatio - b.aspectRatio)
+  const pairs: { imgs: [ImageEntry, ImageEntry]; asymmetric: boolean }[] = []
   for (let i = 0; i < portraits.length - 1; i += 2) {
-    pairs.push([portraits[i], portraits[i + 1]])
+    const ratioDiff = Math.abs(portraits[i].aspectRatio - portraits[i + 1].aspectRatio)
+    pairs.push({
+      imgs: [portraits[i], portraits[i + 1]],
+      asymmetric: ratioDiff > 0.15,
+    })
   }
-  // Odd portrait left over — pair it with the last landscape/square as asymmetric
   const oddPortrait = portraits.length % 2 === 1 ? portraits[portraits.length - 1] : null
 
-  // Build interleaved sequence: distribute pairs among singles
-  const result: Array<{ type: 'single'; img: ImageEntry } | { type: 'portraitPair'; imgs: [ImageEntry, ImageEntry] }> = []
-
-  let oi = 0 // others index
-  let pi = 0 // pairs index
-
-  // Interleave: after every 2-3 singles, insert a pair
+  const result: SeqItem[] = []
+  let oi = 0
+  let pi = 0
   let sinceLastPair = 0
+  // Vary spacing: alternate between inserting pair after 2 and 3 singles
+  let pairInterval = 2
 
   while (oi < others.length || pi < pairs.length) {
-    // Insert a pair every 2-3 singles
-    if (pi < pairs.length && (sinceLastPair >= 2 || oi >= others.length)) {
-      result.push({ type: 'portraitPair', imgs: pairs[pi] })
+    if (pi < pairs.length && (sinceLastPair >= pairInterval || oi >= others.length)) {
+      result.push({ type: 'portraitPair', ...pairs[pi] })
       pi++
       sinceLastPair = 0
+      pairInterval = pairInterval === 2 ? 3 : 2
     } else if (oi < others.length) {
       result.push({ type: 'single', img: others[oi] })
       oi++
@@ -60,11 +63,8 @@ function prepareSequence(images: ImageEntry[]): Array<{ type: 'single'; img: Ima
     }
   }
 
-  // Handle odd portrait — insert as asymmetric with the last single before it
   if (oddPortrait) {
-    // Find a landscape to pair with, or just add as a pair with itself
-    // Best: insert near the end paired with a nearby landscape
-    result.push({ type: 'portraitPair', imgs: [oddPortrait, oddPortrait] })
+    result.push({ type: 'portraitPair', imgs: [oddPortrait, oddPortrait], asymmetric: false })
   }
 
   return result
@@ -75,6 +75,7 @@ export function buildLayout(images: ImageEntry[]): LayoutBlock[] {
   const blocks: LayoutBlock[] = []
   let lastType: string | null = null
   let imagesSinceBreak = 0
+  let singleCount = 0
 
   for (const item of sequence) {
     // Insert chapter break at interval
@@ -85,43 +86,53 @@ export function buildLayout(images: ImageEntry[]): LayoutBlock[] {
     }
 
     if (item.type === 'portraitPair') {
-      // Skip duplicate odd-portrait placeholder
       if (item.imgs[0].id === item.imgs[1].id) {
-        // Odd portrait — show as centered single instead of a weird duplicate pair
+        // Odd portrait — centered single
         const blockType: BlockType = lastType !== 'centeredSingle' ? 'centeredSingle' : 'hero'
         blocks.push({ type: blockType, images: [item.imgs[0]] })
         imagesSinceBreak += 1
         lastType = blockType
+      } else if (item.asymmetric && lastType !== 'asymmetricPair') {
+        // Different aspect ratios — use asymmetric layout
+        blocks.push({ type: 'asymmetricPair', images: [item.imgs[0], item.imgs[1]] })
+        imagesSinceBreak += 2
+        lastType = 'asymmetricPair'
+      } else if (lastType !== 'pair' && lastType !== 'asymmetricPair') {
+        blocks.push({ type: 'pair', images: [item.imgs[0], item.imgs[1]] })
+        imagesSinceBreak += 2
+        lastType = 'pair'
+      } else if (lastType === 'pair') {
+        // After a pair, use asymmetric for variety
+        blocks.push({ type: 'asymmetricPair', images: [item.imgs[0], item.imgs[1]] })
+        imagesSinceBreak += 2
+        lastType = 'asymmetricPair'
       } else {
-        const blockType: BlockType = lastType !== 'pair' ? 'pair' : 'centeredSingle'
-        if (blockType === 'pair') {
-          blocks.push({ type: 'pair', images: [item.imgs[0], item.imgs[1]] })
-          imagesSinceBreak += 2
-        } else {
-          // Rhythm conflict — split into two centered singles
-          blocks.push({ type: 'centeredSingle', images: [item.imgs[0]] })
-          imagesSinceBreak += 1
-          lastType = 'centeredSingle'
-          // Check for chapter break
-          if (imagesSinceBreak >= CHAPTER_MIN && lastType !== 'chapterBreak') {
-            blocks.push({ type: 'chapterBreak', images: [] })
-            lastType = 'chapterBreak'
-            imagesSinceBreak = 0
-          }
-          blocks.push({ type: 'pair', images: [item.imgs[1], item.imgs[0]] })
-          imagesSinceBreak += 1
+        // After asymmetricPair — split into two singles
+        blocks.push({ type: 'centeredSingle', images: [item.imgs[0]] })
+        imagesSinceBreak += 1
+        lastType = 'centeredSingle'
+        if (imagesSinceBreak >= CHAPTER_MIN) {
+          blocks.push({ type: 'chapterBreak', images: [] })
+          lastType = 'chapterBreak'
+          imagesSinceBreak = 0
         }
+        blocks.push({ type: 'pair', images: [item.imgs[1], item.imgs[0]] })
+        imagesSinceBreak += 1
         lastType = 'pair'
       }
     } else {
-      // Single image (landscape or square)
       const img = item.img
       const imgClass = classify(img)
       let chosen: BlockType
+      singleCount++
 
+      // Vary rhythm: every 3rd single, prefer the less-used type
       if (imgClass === 'landscape' && lastType !== 'hero') {
         chosen = 'hero'
       } else if (imgClass === 'square' && lastType !== 'centeredSingle') {
+        chosen = 'centeredSingle'
+      } else if (singleCount % 3 === 0 && lastType !== 'centeredSingle') {
+        // Break up hero runs — force centered single occasionally
         chosen = 'centeredSingle'
       } else if (lastType !== 'hero') {
         chosen = 'hero'
