@@ -78,11 +78,9 @@ export function buildLayout(images: ImageEntry[]): LayoutBlock[] {
         chosen = 'hero'
       } else if (lastType !== 'centeredSingle') {
         chosen = 'centeredSingle'
-      } else if (lastType !== 'hero') {
-        chosen = 'hero'
       } else {
-        // Last resort -- just use centeredSingle even if repeated
-        chosen = 'centeredSingle'
+        // lastType is centeredSingle, so hero is always safe here
+        chosen = 'hero'
       }
     }
 
