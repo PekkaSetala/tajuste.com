@@ -63,6 +63,11 @@ export default function HomePage() {
         fontSize: 11,
         letterSpacing: '0.05em',
         color: 'var(--text-link)',
+        background: 'rgba(237, 236, 234, 0.85)',
+        backdropFilter: 'blur(8px)',
+        WebkitBackdropFilter: 'blur(8px)',
+        padding: '6px 10px',
+        borderRadius: 4,
       }}>
         <a href="mailto:tajuste@gmail.com">tajuste@gmail.com</a>
         <a href="https://instagram.com/tajustephoto" target="_blank" rel="noopener noreferrer">Instagram</a>
