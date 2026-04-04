@@ -37,7 +37,7 @@ export default function HomePage() {
         gap: 16,
         fontSize: 11,
         letterSpacing: '0.05em',
-        color: 'var(--text-secondary)',
+        color: 'var(--text-link)',
       }}>
         <a href="mailto:tajuste@gmail.com">tajuste@gmail.com</a>
         <a href="https://instagram.com/tajustephoto" target="_blank" rel="noopener noreferrer">Instagram</a>
