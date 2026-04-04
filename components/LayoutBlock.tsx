@@ -6,6 +6,12 @@ interface Props {
   onImageClick: (img: ImageEntry) => void
 }
 
+// Derive a readable alt from filename: "1 (23).JPG" -> "Photo 23"
+function altFromFilename(filename: string): string {
+  const match = filename.match(/\((\d+)\)/)
+  return match ? `Photo ${match[1]}` : 'Photograph by Tajuste'
+}
+
 function ImageCard({ img, onClick, sizes, priority }: {
   img: ImageEntry
   onClick: () => void
@@ -15,12 +21,16 @@ function ImageCard({ img, onClick, sizes, priority }: {
   return (
     <div
       onClick={onClick}
+      onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); onClick() } }}
       className="image-mat"
       style={{ cursor: 'pointer', lineHeight: 0 }}
+      role="button"
+      tabIndex={0}
+      aria-label={`View ${altFromFilename(img.filename)} in lightbox`}
     >
       <Image
         src={`/images/${encodeURIComponent(img.filename)}`}
-        alt=""
+        alt={altFromFilename(img.filename)}
         width={img.width}
         height={img.height}
         style={{ width: '100%', height: 'auto', display: 'block' }}

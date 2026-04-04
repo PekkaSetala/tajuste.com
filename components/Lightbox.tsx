@@ -115,12 +115,46 @@ export default function Lightbox({ images, currentIndex, onNavigate, onClose }: 
     else onClose()
   }
 
+  // Focus trap: keep focus inside the lightbox
+  const dialogRef = useRef<HTMLDivElement>(null)
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog) return
+    const previouslyFocused = document.activeElement as HTMLElement
+    // Focus close button on open
+    const closeBtn = dialog.querySelector<HTMLButtonElement>('button[aria-label="Close lightbox"]')
+    closeBtn?.focus()
+    return () => { previouslyFocused?.focus?.() }
+  }, [])
+
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog) return
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key !== 'Tab') return
+      const focusable = dialog.querySelectorAll<HTMLElement>('button:not([disabled])')
+      if (focusable.length === 0) return
+      const first = focusable[0]
+      const last = focusable[focusable.length - 1]
+      if (e.shiftKey && document.activeElement === first) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && document.activeElement === last) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+    window.addEventListener('keydown', onKeyDown)
+    return () => window.removeEventListener('keydown', onKeyDown)
+  }, [])
+
   if (!img) return null
 
   const controlOpacity = controlsVisible ? 1 : 0
 
   return (
     <motion.div
+      ref={dialogRef}
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
