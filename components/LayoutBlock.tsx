@@ -56,11 +56,11 @@ export default function LayoutBlock({ block, onImageClick }: Props) {
   if (type === 'hero') {
     const img = images[0]
     return (
-      <div style={{ padding: '0 var(--page-padding)', marginBottom: 'var(--block-gap)', lineHeight: 0 }}>
+      <div style={{ padding: '0 var(--page-padding)', marginBottom: 'var(--block-gap)', lineHeight: 0, maxWidth: 1400, marginLeft: 'auto', marginRight: 'auto' }}>
         <ImageCard
           img={img}
           onClick={() => onImageClick(img)}
-          sizes="100vw"
+          sizes="(min-width: 1400px) 1400px, 100vw"
         />
       </div>
     )
