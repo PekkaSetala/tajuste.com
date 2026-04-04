@@ -3,7 +3,7 @@ import '@/styles/globals.css'
 
 export const metadata: Metadata = {
   title: 'Tajuste',
-  description: '',
+  description: 'Photography by Tajuste',
   robots: { index: true, follow: true },
 }
 
