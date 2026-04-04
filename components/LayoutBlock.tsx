@@ -18,6 +18,7 @@ function ImageCard({ img, onClick, sizes, priority }: {
   sizes: string
   priority?: boolean
 }) {
+  const alt = altFromFilename(img.filename)
   return (
     <div
       onClick={onClick}
@@ -26,18 +27,18 @@ function ImageCard({ img, onClick, sizes, priority }: {
       style={{ cursor: 'pointer', lineHeight: 0 }}
       role="button"
       tabIndex={0}
-      aria-label={`View ${altFromFilename(img.filename)} in lightbox`}
+      aria-label={`View ${alt} in lightbox`}
     >
       <Image
         src={`/images/${encodeURIComponent(img.filename)}`}
-        alt={altFromFilename(img.filename)}
+        alt={alt}
         width={img.width}
         height={img.height}
-        style={{ width: '100%', height: 'auto', display: 'block' }}
+        style={{ height: 'auto', display: 'block' }}
         placeholder={img.blurDataUrl ? 'blur' : 'empty'}
         blurDataURL={img.blurDataUrl ?? undefined}
         sizes={sizes}
-        loading={priority ? 'eager' : 'lazy'}
+        priority={priority}
       />
     </div>
   )

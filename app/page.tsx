@@ -63,7 +63,7 @@ export default function HomePage() {
         fontSize: 11,
         letterSpacing: '0.05em',
         color: 'var(--text-link)',
-        background: 'rgba(237, 236, 234, 0.85)',
+        background: 'var(--bg-glass)',
         backdropFilter: 'blur(8px)',
         WebkitBackdropFilter: 'blur(8px)',
         padding: '6px 10px',

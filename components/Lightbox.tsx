@@ -13,11 +13,24 @@ interface Props {
 
 const EASE_OUT: [number, number, number, number] = [0.23, 1, 0.32, 1]
 
+const controlBase: React.CSSProperties = {
+  position: 'absolute',
+  zIndex: 110,
+  background: 'none',
+  border: 'none',
+  cursor: 'pointer',
+  lineHeight: 1,
+  transition: 'opacity 200ms ease-out',
+}
+
 export default function Lightbox({ images, currentIndex, onNavigate, onClose }: Props) {
   const img = images[currentIndex]
   const touchRef = useRef({ startX: 0, startY: 0, startT: 0 })
   const [controlsVisible, setControlsVisible] = useState(true)
-  const hideTimer = useRef<ReturnType<typeof setTimeout>>(null)
+  const hideTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const isVisible = useRef(true)
+  const preloaded = useRef(new Set<string>())
+  const dialogRef = useRef<HTMLDivElement>(null)
 
   const hasPrev = currentIndex > 0
   const hasNext = currentIndex < images.length - 1
@@ -32,9 +45,9 @@ export default function Lightbox({ images, currentIndex, onNavigate, onClose }: 
 
   // Auto-hide controls after inactivity
   const resetHideTimer = useCallback(() => {
-    setControlsVisible(true)
+    if (!isVisible.current) { isVisible.current = true; setControlsVisible(true) }
     if (hideTimer.current) clearTimeout(hideTimer.current)
-    hideTimer.current = setTimeout(() => setControlsVisible(false), 3000)
+    hideTimer.current = setTimeout(() => { isVisible.current = false; setControlsVisible(false) }, 3000)
   }, [])
 
   useEffect(() => {
@@ -42,23 +55,45 @@ export default function Lightbox({ images, currentIndex, onNavigate, onClose }: 
     return () => { if (hideTimer.current) clearTimeout(hideTimer.current) }
   }, [currentIndex, resetHideTimer])
 
-  // Show controls on mouse move
   useEffect(() => {
-    const onMove = () => resetHideTimer()
-    window.addEventListener('mousemove', onMove)
-    return () => window.removeEventListener('mousemove', onMove)
+    window.addEventListener('mousemove', resetHideTimer)
+    return () => window.removeEventListener('mousemove', resetHideTimer)
   }, [resetHideTimer])
 
-  // Keyboard navigation
+  // Keyboard navigation + focus trap (single listener)
   useEffect(() => {
+    const dialog = dialogRef.current
     const handler = (e: KeyboardEvent) => {
       if (e.key === 'ArrowRight' || e.key === ' ') { e.preventDefault(); advance() }
-      if (e.key === 'ArrowLeft') { e.preventDefault(); back() }
-      if (e.key === 'Escape') onClose()
+      else if (e.key === 'ArrowLeft') { e.preventDefault(); back() }
+      else if (e.key === 'Escape') onClose()
+      else if (e.key === 'Tab' && dialog) {
+        const focusable = dialog.querySelectorAll<HTMLElement>('button:not([disabled])')
+        if (focusable.length === 0) return
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault()
+          last.focus()
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault()
+          first.focus()
+        }
+      }
     }
     window.addEventListener('keydown', handler)
     return () => window.removeEventListener('keydown', handler)
   }, [advance, back, onClose])
+
+  // Focus close button on mount, restore on unmount
+  useEffect(() => {
+    const dialog = dialogRef.current
+    if (!dialog) return
+    const previouslyFocused = document.activeElement as HTMLElement
+    const closeBtn = dialog.querySelector<HTMLButtonElement>('button[aria-label="Close lightbox"]')
+    closeBtn?.focus()
+    return () => { previouslyFocused?.focus?.() }
+  }, [])
 
   // Touch swipe
   useEffect(() => {
@@ -92,7 +127,7 @@ export default function Lightbox({ images, currentIndex, onNavigate, onClose }: 
     }
   }, [advance, back, onClose])
 
-  // Preload adjacent images
+  // Preload adjacent images (deduplicated)
   useEffect(() => {
     const connection = (navigator as any).connection
     if (connection?.saveData || connection?.effectiveType === 'slow-2g') return
@@ -101,12 +136,14 @@ export default function Lightbox({ images, currentIndex, onNavigate, onClose }: 
       .filter(i => i >= 0 && i < images.length)
 
     toPreload.forEach(i => {
+      const src = `/images/${encodeURIComponent(images[i].filename)}`
+      if (preloaded.current.has(src)) return
+      preloaded.current.add(src)
       const preImg = new window.Image()
-      preImg.src = `/images/${encodeURIComponent(images[i].filename)}`
+      preImg.src = src
     })
   }, [currentIndex, images])
 
-  // Click zones: left 30% = back, right 30% = forward, middle 40% = close
   const handleClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) return
     const x = e.clientX / window.innerWidth
@@ -114,39 +151,6 @@ export default function Lightbox({ images, currentIndex, onNavigate, onClose }: 
     else if (x > 0.7) advance()
     else onClose()
   }
-
-  // Focus trap: keep focus inside the lightbox
-  const dialogRef = useRef<HTMLDivElement>(null)
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-    const previouslyFocused = document.activeElement as HTMLElement
-    // Focus close button on open
-    const closeBtn = dialog.querySelector<HTMLButtonElement>('button[aria-label="Close lightbox"]')
-    closeBtn?.focus()
-    return () => { previouslyFocused?.focus?.() }
-  }, [])
-
-  useEffect(() => {
-    const dialog = dialogRef.current
-    if (!dialog) return
-    const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key !== 'Tab') return
-      const focusable = dialog.querySelectorAll<HTMLElement>('button:not([disabled])')
-      if (focusable.length === 0) return
-      const first = focusable[0]
-      const last = focusable[focusable.length - 1]
-      if (e.shiftKey && document.activeElement === first) {
-        e.preventDefault()
-        last.focus()
-      } else if (!e.shiftKey && document.activeElement === last) {
-        e.preventDefault()
-        first.focus()
-      }
-    }
-    window.addEventListener('keydown', onKeyDown)
-    return () => window.removeEventListener('keydown', onKeyDown)
-  }, [])
 
   if (!img) return null
 
@@ -174,101 +178,50 @@ export default function Lightbox({ images, currentIndex, onNavigate, onClose }: 
         cursor: 'pointer',
       }}
     >
-      {/* Close button */}
       <button
         onClick={(e) => { e.stopPropagation(); onClose() }}
         aria-label="Close lightbox"
-        style={{
-          position: 'absolute',
-          top: 16,
-          right: 16,
-          zIndex: 110,
-          background: 'none',
-          border: 'none',
-          color: 'rgba(255,255,255,0.7)',
-          fontSize: 28,
-          cursor: 'pointer',
-          padding: '8px 12px',
-          lineHeight: 1,
-          opacity: controlOpacity,
-          transition: 'opacity 200ms ease-out',
-        }}
+        style={{ ...controlBase, top: 16, right: 16, color: 'rgba(255,255,255,0.7)', fontSize: 28, padding: '8px 12px', opacity: controlOpacity }}
       >
         ✕
       </button>
 
-      {/* Left arrow */}
       {hasPrev && (
         <button
           onClick={(e) => { e.stopPropagation(); back() }}
           aria-label="Previous image"
-          style={{
-            position: 'absolute',
-            left: 16,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            zIndex: 110,
-            background: 'none',
-            border: 'none',
-            color: 'rgba(255,255,255,0.5)',
-            fontSize: 32,
-            cursor: 'pointer',
-            padding: '16px 12px',
-            lineHeight: 1,
-            opacity: controlOpacity,
-            transition: 'opacity 200ms ease-out',
-          }}
+          style={{ ...controlBase, left: 16, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.5)', fontSize: 32, padding: '16px 12px', opacity: controlOpacity }}
         >
           ‹
         </button>
       )}
 
-      {/* Right arrow */}
       {hasNext && (
         <button
           onClick={(e) => { e.stopPropagation(); advance() }}
           aria-label="Next image"
-          style={{
-            position: 'absolute',
-            right: 16,
-            top: '50%',
-            transform: 'translateY(-50%)',
-            zIndex: 110,
-            background: 'none',
-            border: 'none',
-            color: 'rgba(255,255,255,0.5)',
-            fontSize: 32,
-            cursor: 'pointer',
-            padding: '16px 12px',
-            lineHeight: 1,
-            opacity: controlOpacity,
-            transition: 'opacity 200ms ease-out',
-          }}
+          style={{ ...controlBase, right: 16, top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.5)', fontSize: 32, padding: '16px 12px', opacity: controlOpacity }}
         >
           ›
         </button>
       )}
 
-      {/* Image counter */}
       <div
         style={{
-          position: 'absolute',
+          ...controlBase,
           bottom: 20,
           left: '50%',
           transform: 'translateX(-50%)',
-          zIndex: 110,
           color: 'rgba(255,255,255,0.5)',
           fontSize: 12,
           letterSpacing: '0.1em',
           fontFamily: 'var(--font-sans)',
           opacity: controlOpacity,
-          transition: 'opacity 200ms ease-out',
         }}
       >
         {currentIndex + 1} / {images.length}
       </div>
 
-      {/* Image */}
       <AnimatePresence mode="wait">
         <motion.div
           key={img.id}
