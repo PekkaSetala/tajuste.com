@@ -15,7 +15,8 @@ function ImageCard({ img, onClick, sizes, priority }: {
   return (
     <div
       onClick={onClick}
-      style={{ cursor: 'pointer', lineHeight: 0, position: 'relative' }}
+      className="image-mat"
+      style={{ cursor: 'pointer', lineHeight: 0 }}
     >
       <Image
         src={`/images/${encodeURIComponent(img.filename)}`}
@@ -55,14 +56,12 @@ export default function LayoutBlock({ block, onImageClick }: Props) {
   if (type === 'hero') {
     const img = images[0]
     return (
-      <div style={{ padding: '0 var(--page-padding)', marginBottom: 'var(--block-gap)' }}>
-        <div style={{ maxHeight: '70vh', overflow: 'hidden', lineHeight: 0 }}>
-          <ImageCard
-            img={img}
-            onClick={() => onImageClick(img)}
-            sizes="100vw"
-          />
-        </div>
+      <div style={{ padding: '0 var(--page-padding)', marginBottom: 'var(--block-gap)', lineHeight: 0 }}>
+        <ImageCard
+          img={img}
+          onClick={() => onImageClick(img)}
+          sizes="100vw"
+        />
       </div>
     )
   }
@@ -71,14 +70,14 @@ export default function LayoutBlock({ block, onImageClick }: Props) {
     const [left, right] = images
     return (
       <div className="editorial-pair">
-        <div style={{ flex: 1 }}>
+        <div className="editorial-pair-item">
           <ImageCard
             img={left}
             onClick={() => onImageClick(left)}
             sizes="(max-width: 768px) 100vw, 50vw"
           />
         </div>
-        <div style={{ flex: 1 }}>
+        <div className="editorial-pair-item">
           <ImageCard
             img={right}
             onClick={() => onImageClick(right)}
@@ -115,15 +114,15 @@ export default function LayoutBlock({ block, onImageClick }: Props) {
       ? [large, small]
       : [small, large]
     return (
-      <div className="editorial-pair" style={{ alignItems: 'start' }}>
-        <div style={{ flex: 2 }}>
+      <div className="editorial-pair">
+        <div className="editorial-pair-item" style={{ flex: 2 }}>
           <ImageCard
             img={first}
             onClick={() => onImageClick(first)}
             sizes="(max-width: 768px) 100vw, 66vw"
           />
         </div>
-        <div style={{ flex: 1 }}>
+        <div className="editorial-pair-item" style={{ flex: 1 }}>
           <ImageCard
             img={second}
             onClick={() => onImageClick(second)}

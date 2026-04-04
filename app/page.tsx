@@ -27,37 +27,21 @@ export default function HomePage() {
       {/* Gallery */}
       <EditorialScroll images={images as ImageEntry[]} />
 
-      {/* Footer */}
-      <footer style={{
-        borderTop: '1px solid var(--divider)',
-        margin: '48px var(--page-padding) 0',
-        padding: '32px 0',
+      {/* Fixed contact info */}
+      <div style={{
+        position: 'fixed',
+        bottom: 20,
+        left: 'var(--page-padding)',
+        zIndex: 50,
         display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        flexWrap: 'wrap',
         gap: 16,
+        fontSize: 11,
+        letterSpacing: '0.05em',
+        color: 'var(--text-secondary)',
       }}>
-        <span style={{
-          fontFamily: 'var(--font-serif)',
-          fontSize: 12,
-          letterSpacing: '0.2em',
-          color: 'var(--text-secondary)',
-          textTransform: 'uppercase',
-        }}>
-          Tajuste
-        </span>
-        <div style={{
-          display: 'flex',
-          gap: 24,
-          fontSize: 11,
-          letterSpacing: '0.05em',
-          color: 'var(--text-secondary)',
-        }}>
-          <a href="mailto:tajuste@gmail.com">tajuste@gmail.com</a>
-          <a href="https://instagram.com/_tajustephoto" target="_blank" rel="noopener noreferrer">Instagram</a>
-        </div>
-      </footer>
+        <a href="mailto:tajuste@gmail.com">tajuste@gmail.com</a>
+        <a href="https://instagram.com/tajustephoto" target="_blank" rel="noopener noreferrer">Instagram</a>
+      </div>
     </main>
   )
 }
