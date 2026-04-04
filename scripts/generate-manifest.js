@@ -8,7 +8,7 @@ const path = require('path')
 const sharp = require('sharp')
 const { encode: blurhashEncode, decode: blurhashDecode } = require('blurhash')
 
-const IMAGES_DIR = path.join(__dirname, '../public/images')
+const IMAGES_DIR = path.join(__dirname, '../pics_web')
 const MANIFEST_PATH = path.join(__dirname, '../data/images.json')
 const DRY_RUN = process.argv.includes('--dry-run')
 
