@@ -27,6 +27,31 @@ export default function HomePage() {
       {/* Gallery */}
       <EditorialScroll images={images as ImageEntry[]} />
 
+      {/* End of gallery */}
+      <footer style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        gap: 8,
+        padding: '64px var(--page-padding) 80px',
+      }}>
+        <div style={{
+          width: 40,
+          height: 1,
+          background: 'var(--divider)',
+        }} />
+        <span style={{
+          fontFamily: 'var(--font-serif)',
+          fontSize: 12,
+          letterSpacing: '0.2em',
+          color: 'var(--text-secondary)',
+          textTransform: 'uppercase',
+          marginTop: 16,
+        }}>
+          Tajuste
+        </span>
+      </footer>
+
       {/* Fixed contact info */}
       <div style={{
         position: 'fixed',
