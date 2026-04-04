@@ -53,3 +53,17 @@ img {
     transition-duration: 0.01ms !important;
   }
 }
+
+/* Editorial layout responsive */
+.editorial-pair {
+  display: flex;
+  gap: var(--pair-gap);
+  padding: 0 var(--page-padding);
+  margin-bottom: var(--block-gap);
+}
+
+@media (max-width: 768px) {
+  .editorial-pair {
+    flex-direction: column;
+  }
+}
