@@ -3,5 +3,10 @@ node_modules
 out
 .DS_Store
 *.tsbuildinfo
+pics/
 pics_web/
 public/images/
+.playwright-mcp/
+.superpowers/
+*.png
+docs/
