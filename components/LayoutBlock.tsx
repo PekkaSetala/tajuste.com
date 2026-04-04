@@ -52,12 +52,13 @@ export default function LayoutBlock({ block, onImageClick }: Props) {
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: 'var(--block-gap) 0',
+        padding: 'calc(var(--block-gap) * 1.5) 0',
       }}>
         <div style={{
-          width: 40,
+          width: 60,
           height: 1,
-          background: 'var(--divider)',
+          background: 'var(--text-secondary)',
+          opacity: 0.4,
         }} />
       </div>
     )
