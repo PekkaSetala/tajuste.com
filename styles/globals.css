@@ -58,7 +58,7 @@ img {
 /* Image mat — white border like a gallery print */
 .image-mat {
   background: #fff;
-  padding: 10px;
+  padding: clamp(8px, 1.2vw, 16px) clamp(8px, 1.2vw, 16px) clamp(12px, 1.8vw, 24px);
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   transition: box-shadow 200ms ease-out, transform 160ms ease-out;
 }
