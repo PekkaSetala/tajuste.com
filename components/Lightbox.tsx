@@ -1,6 +1,6 @@
 'use client'
 import Image from 'next/image'
-import { useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useRef, useState } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import type { ImageEntry } from '@/lib/types'
 
@@ -11,9 +11,16 @@ interface Props {
   onClose: () => void
 }
 
+const EASE_OUT: [number, number, number, number] = [0.23, 1, 0.32, 1]
+
 export default function Lightbox({ images, currentIndex, onNavigate, onClose }: Props) {
   const img = images[currentIndex]
   const touchRef = useRef({ startX: 0, startY: 0, startT: 0 })
+  const [controlsVisible, setControlsVisible] = useState(true)
+  const hideTimer = useRef<ReturnType<typeof setTimeout>>(null)
+
+  const hasPrev = currentIndex > 0
+  const hasNext = currentIndex < images.length - 1
 
   const advance = useCallback(() => {
     if (currentIndex < images.length - 1) onNavigate(currentIndex + 1)
@@ -22,6 +29,25 @@ export default function Lightbox({ images, currentIndex, onNavigate, onClose }: 
   const back = useCallback(() => {
     if (currentIndex > 0) onNavigate(currentIndex - 1)
   }, [currentIndex, onNavigate])
+
+  // Auto-hide controls after inactivity
+  const resetHideTimer = useCallback(() => {
+    setControlsVisible(true)
+    if (hideTimer.current) clearTimeout(hideTimer.current)
+    hideTimer.current = setTimeout(() => setControlsVisible(false), 3000)
+  }, [])
+
+  useEffect(() => {
+    resetHideTimer()
+    return () => { if (hideTimer.current) clearTimeout(hideTimer.current) }
+  }, [currentIndex, resetHideTimer])
+
+  // Show controls on mouse move
+  useEffect(() => {
+    const onMove = () => resetHideTimer()
+    window.addEventListener('mousemove', onMove)
+    return () => window.removeEventListener('mousemove', onMove)
+  }, [resetHideTimer])
 
   // Keyboard navigation
   useEffect(() => {
@@ -48,12 +74,10 @@ export default function Lightbox({ images, currentIndex, onNavigate, onClose }: 
       const dx = e.changedTouches[0].clientX - startX
       const dy = e.changedTouches[0].clientY - startY
       const dt = Date.now() - startT
-      // Swipe down to close
       if (Math.abs(dy) > Math.abs(dx) * 0.8 && dy > 60) {
         onClose()
         return
       }
-      // Horizontal swipe
       const velocity = Math.abs(dx) / dt
       if (Math.abs(dx) >= 40 || velocity > 0.11) {
         if (dx < 0) advance()
@@ -82,8 +106,9 @@ export default function Lightbox({ images, currentIndex, onNavigate, onClose }: 
     })
   }, [currentIndex, images])
 
-  // Click left/right halves to navigate
+  // Click zones: left 30% = back, right 30% = forward, middle 40% = close
   const handleClick = (e: React.MouseEvent) => {
+    if ((e.target as HTMLElement).closest('button')) return
     const x = e.clientX / window.innerWidth
     if (x < 0.3) back()
     else if (x > 0.7) advance()
@@ -92,13 +117,18 @@ export default function Lightbox({ images, currentIndex, onNavigate, onClose }: 
 
   if (!img) return null
 
+  const controlOpacity = controlsVisible ? 1 : 0
+
   return (
     <motion.div
       initial={{ opacity: 0 }}
       animate={{ opacity: 1 }}
       exit={{ opacity: 0 }}
-      transition={{ duration: 0.25 }}
+      transition={{ duration: 0.2, ease: EASE_OUT }}
       onClick={handleClick}
+      role="dialog"
+      aria-label={`Image ${currentIndex + 1} of ${images.length}`}
+      aria-modal="true"
       style={{
         position: 'fixed',
         inset: 0,
@@ -110,13 +140,108 @@ export default function Lightbox({ images, currentIndex, onNavigate, onClose }: 
         cursor: 'pointer',
       }}
     >
+      {/* Close button */}
+      <button
+        onClick={(e) => { e.stopPropagation(); onClose() }}
+        aria-label="Close lightbox"
+        style={{
+          position: 'absolute',
+          top: 16,
+          right: 16,
+          zIndex: 110,
+          background: 'none',
+          border: 'none',
+          color: 'rgba(255,255,255,0.7)',
+          fontSize: 28,
+          cursor: 'pointer',
+          padding: '8px 12px',
+          lineHeight: 1,
+          opacity: controlOpacity,
+          transition: 'opacity 200ms ease-out',
+        }}
+      >
+        ✕
+      </button>
+
+      {/* Left arrow */}
+      {hasPrev && (
+        <button
+          onClick={(e) => { e.stopPropagation(); back() }}
+          aria-label="Previous image"
+          style={{
+            position: 'absolute',
+            left: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 110,
+            background: 'none',
+            border: 'none',
+            color: 'rgba(255,255,255,0.5)',
+            fontSize: 32,
+            cursor: 'pointer',
+            padding: '16px 12px',
+            lineHeight: 1,
+            opacity: controlOpacity,
+            transition: 'opacity 200ms ease-out',
+          }}
+        >
+          ‹
+        </button>
+      )}
+
+      {/* Right arrow */}
+      {hasNext && (
+        <button
+          onClick={(e) => { e.stopPropagation(); advance() }}
+          aria-label="Next image"
+          style={{
+            position: 'absolute',
+            right: 16,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            zIndex: 110,
+            background: 'none',
+            border: 'none',
+            color: 'rgba(255,255,255,0.5)',
+            fontSize: 32,
+            cursor: 'pointer',
+            padding: '16px 12px',
+            lineHeight: 1,
+            opacity: controlOpacity,
+            transition: 'opacity 200ms ease-out',
+          }}
+        >
+          ›
+        </button>
+      )}
+
+      {/* Image counter */}
+      <div
+        style={{
+          position: 'absolute',
+          bottom: 20,
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 110,
+          color: 'rgba(255,255,255,0.5)',
+          fontSize: 12,
+          letterSpacing: '0.1em',
+          fontFamily: 'var(--font-sans)',
+          opacity: controlOpacity,
+          transition: 'opacity 200ms ease-out',
+        }}
+      >
+        {currentIndex + 1} / {images.length}
+      </div>
+
+      {/* Image */}
       <AnimatePresence mode="wait">
         <motion.div
           key={img.id}
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.25 }}
+          transition={{ duration: 0.2, ease: EASE_OUT }}
           style={{
             position: 'relative',
             width: '100%',

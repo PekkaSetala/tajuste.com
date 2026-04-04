@@ -73,7 +73,7 @@ function prepareSequence(images: ImageEntry[]): Array<{ type: 'single'; img: Ima
 export function buildLayout(images: ImageEntry[]): LayoutBlock[] {
   const sequence = prepareSequence(images)
   const blocks: LayoutBlock[] = []
-  let lastType: BlockType | null = null
+  let lastType: string | null = null
   let imagesSinceBreak = 0
 
   for (const item of sequence) {
