@@ -17,16 +17,14 @@ export default function EditorialScroll({ images }: Props) {
   const [lightboxIndex, setLightboxIndex] = useState<number | null>(null)
   const scrollRef = useRef(0)
 
-  // Session-shuffled images
+  // Render with original order immediately, shuffle once seed resolves
   const shuffled = useMemo(() => {
     if (seed === null) return images
     return seededShuffle(images, seed)
   }, [seed, images])
 
-  // Build layout blocks from shuffled images
   const blocks = useMemo(() => buildLayout(shuffled), [shuffled])
 
-  // Flat list for lightbox navigation (all images in layout order)
   const flatImages = useMemo(() => {
     return blocks.flatMap(b => b.images)
   }, [blocks])
@@ -43,9 +41,6 @@ export default function EditorialScroll({ images }: Props) {
     document.body.style.overflow = ''
     requestAnimationFrame(() => window.scrollTo(0, scrollRef.current))
   }, [])
-
-  // Don't render until seed is ready (avoid layout shift from reshuffle)
-  if (seed === null) return null
 
   return (
     <>
