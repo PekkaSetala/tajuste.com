@@ -7,7 +7,8 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "manifest": "node scripts/generate-manifest.js"
+    "manifest": "node scripts/generate-manifest.js",
+    "deploy": "bash scripts/deploy.sh"
   },
   "dependencies": {
     "blurhash": "^2.0.5",
