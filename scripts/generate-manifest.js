@@ -62,11 +62,20 @@ async function main() {
     .filter(f => /\.(jpe?g|png|webp|avif)$/i.test(f))
     .sort()
 
+  // Prune entries whose source files no longer exist
+  const fileSet = new Set(files)
+  const kept = existing.filter(e => fileSet.has(e.filename))
+  const pruned = existing.length - kept.length
+  if (pruned > 0) {
+    console.log(`Pruned ${pruned} entries (source files removed).`)
+  }
+  const keptByFilename = Object.fromEntries(kept.map(e => [e.filename, e]))
+
   const newEntries = []
   let skipped = 0
 
   for (const filename of files) {
-    if (existingByFilename[filename]) {
+    if (keptByFilename[filename]) {
       skipped++
       continue
     }
@@ -115,9 +124,9 @@ async function main() {
     return
   }
 
-  if (newEntries.length > 0) {
+  if (newEntries.length > 0 || pruned > 0) {
     // Check for duplicate IDs
-    const all = [...existing, ...newEntries]
+    const all = [...kept, ...newEntries]
     const ids = all.map(e => e.id)
     const dupes = ids.filter((id, i) => ids.indexOf(id) !== i)
     if (dupes.length > 0) {

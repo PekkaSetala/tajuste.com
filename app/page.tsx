@@ -69,7 +69,7 @@ export default function HomePage() {
         padding: '6px 10px',
         borderRadius: 4,
       }}>
-        <a href="mailto:tajuste@gmail.com">tajuste@gmail.com</a>
+        <a href="mailto:tajuste@gmail.com">e-mail</a>
         <a href="https://instagram.com/tajustephoto" target="_blank" rel="noopener noreferrer">Instagram</a>
       </div>
     </main>
