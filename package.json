@@ -8,7 +8,8 @@
     "start": "next start",
     "lint": "next lint",
     "manifest": "node scripts/generate-manifest.js",
-    "deploy": "bash scripts/deploy.sh"
+    "deploy": "bash scripts/deploy.sh",
+    "sync-private": "bash scripts/sync-private.sh"
   },
   "dependencies": {
     "blurhash": "^2.0.5",
