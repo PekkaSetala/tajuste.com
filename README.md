@@ -19,4 +19,4 @@ Next.js 15 / React 19 / TypeScript / Framer Motion 11
 
 ## License
 
-All photographs are copyrighted by Tajuste. Code is MIT.
+All photographs are copyrighted by Pekka Setälä. Code is MIT.
