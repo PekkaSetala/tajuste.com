@@ -53,14 +53,13 @@ Site root: `/home/servaaja/tajuste.com`. SSL via Let's Encrypt.
 SSH alias `webserve` is configured in `~/.ssh/config`.
 
 ```bash
-npm run deploy    # Build → deploy to server → push origin + private
+npm run deploy        # Build → deploy to server → push to origin
+npm run sync-private  # Sync code + CLAUDE.md to private repo
 ```
 
 Two GitHub remotes:
 - `origin` — public repo (PekkaSetala/tajuste.com) — no CLAUDE.md, no pics
 - `private` — private repo (PekkaSetala/tajuste.com-private) — includes CLAUDE.md + pics
-
-`npm run deploy` handles both: pushes to origin normally, then syncs to private with CLAUDE.md included.
 
 ## Workflow
 
