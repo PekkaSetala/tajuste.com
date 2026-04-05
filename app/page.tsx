@@ -53,22 +53,7 @@ export default function HomePage() {
       </footer>
 
       {/* Fixed contact info */}
-      <div style={{
-        position: 'fixed',
-        bottom: 20,
-        left: 'var(--page-padding)',
-        zIndex: 50,
-        display: 'flex',
-        gap: 16,
-        fontSize: 11,
-        letterSpacing: '0.05em',
-        color: 'var(--text-link)',
-        background: 'var(--bg-glass)',
-        backdropFilter: 'blur(8px)',
-        WebkitBackdropFilter: 'blur(8px)',
-        padding: '6px 10px',
-        borderRadius: 4,
-      }}>
+      <div className="contact-bar">
         <a href="mailto:tajuste@gmail.com">e-mail</a>
         <a href="https://instagram.com/tajustephoto" target="_blank" rel="noopener noreferrer">instagram</a>
       </div>

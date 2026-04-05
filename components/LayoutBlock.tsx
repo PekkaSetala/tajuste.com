@@ -49,12 +49,7 @@ export default function LayoutBlock({ block, onImageClick }: Props) {
 
   if (type === 'chapterBreak') {
     return (
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        padding: 'calc(var(--block-gap) * 1.5) 0',
-      }}>
+      <div className="chapter-break">
         <div style={{
           width: 60,
           height: 1,
@@ -109,7 +104,7 @@ export default function LayoutBlock({ block, onImageClick }: Props) {
         padding: '0 var(--page-padding)',
         marginBottom: 'var(--block-gap)',
       }}>
-        <div style={{ width: '60%', minWidth: 280 }}>
+        <div className="centered-single-wrapper">
           <ImageCard
             img={img}
             onClick={() => onImageClick(img)}
@@ -126,7 +121,7 @@ export default function LayoutBlock({ block, onImageClick }: Props) {
       ? [large, small]
       : [small, large]
     return (
-      <div className="editorial-pair">
+      <div className="editorial-pair editorial-pair--asymmetric">
         <div className="editorial-pair-item" style={{ flex: 2 }}>
           <ImageCard
             img={first}

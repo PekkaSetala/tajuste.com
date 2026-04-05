@@ -20,7 +20,7 @@ lib/          — layout algorithm, types, seeded PRNG
 hooks/        — useSessionSeed (session-based shuffle)
 styles/       — globals.css (design tokens, mat styles)
 data/         — images.json (generated manifest)
-scripts/      — generate-manifest.js (dimensions + blurhash)
+scripts/      — deploy.sh, sync-private.sh, generate-manifest.js, check-claude-freshness.sh
 pics_web/     — ~154 optimized source JPGs
 public/images — served images (symlinked from pics_web)
 out/          — static export output
@@ -35,9 +35,11 @@ out/          — static export output
 ## Commands
 
 ```bash
-npm run dev         # Dev server
-npm run build       # Production build → out/
-npm run manifest    # Regenerate data/images.json after adding/removing photos
+npm run dev           # Dev server
+npm run build         # Production build → out/
+npm run manifest      # Regenerate data/images.json after adding/removing photos
+npm run deploy        # Build → deploy to server → push to origin
+npm run sync-private  # Sync code + CLAUDE.md to private repo
 ```
 
 ## Design Tokens
@@ -53,14 +55,13 @@ Site root: `/home/servaaja/tajuste.com`. SSL via Let's Encrypt.
 SSH alias `webserve` is configured in `~/.ssh/config`.
 
 ```bash
-npm run deploy    # Build → deploy to server → push origin + private
+npm run deploy        # Build → deploy to server → push to origin
+npm run sync-private  # Sync code + CLAUDE.md to private repo
 ```
 
 Two GitHub remotes:
 - `origin` — public repo (PekkaSetala/tajuste.com) — no CLAUDE.md, no pics
 - `private` — private repo (PekkaSetala/tajuste.com-private) — includes CLAUDE.md + pics
-
-`npm run deploy` handles both: pushes to origin normally, then syncs to private with CLAUDE.md included.
 
 ## Workflow
 
