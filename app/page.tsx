@@ -70,7 +70,7 @@ export default function HomePage() {
         borderRadius: 4,
       }}>
         <a href="mailto:tajuste@gmail.com">e-mail</a>
-        <a href="https://instagram.com/tajustephoto" target="_blank" rel="noopener noreferrer">Instagram</a>
+        <a href="https://instagram.com/tajustephoto" target="_blank" rel="noopener noreferrer">instagram</a>
       </div>
     </main>
   )

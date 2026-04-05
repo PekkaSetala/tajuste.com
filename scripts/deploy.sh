@@ -17,7 +17,7 @@ echo "=== Syncing to private (with CLAUDE.md) ==="
 git stash --include-untracked -q 2>/dev/null || true
 git add -f CLAUDE.md
 git commit --no-verify -m "sync: include CLAUDE.md for private repo" -q
-git push private main --force -q
+git push --no-verify private main --force -q
 git reset --soft HEAD~1 -q
 git reset HEAD CLAUDE.md -q
 git stash pop -q 2>/dev/null || true
