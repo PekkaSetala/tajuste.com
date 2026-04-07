@@ -10,10 +10,11 @@ git checkout -b "$BRANCH" -q
 
 # Add gitignored files that belong in private
 git add -f CLAUDE.md
+git add -f pics_web/
 
 # Commit if there's anything new
 if ! git diff --cached --quiet 2>/dev/null; then
-  git commit --no-verify -m "sync: include CLAUDE.md" -q
+  git commit --no-verify -m "sync: include CLAUDE.md and pics" -q
 fi
 
 # Force push to private main
