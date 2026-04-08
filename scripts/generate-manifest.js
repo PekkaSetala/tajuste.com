@@ -8,8 +8,11 @@ const path = require('path')
 const sharp = require('sharp')
 const { encode: blurhashEncode, decode: blurhashDecode } = require('blurhash')
 
-const IMAGES_DIR = path.join(__dirname, '../pics_web')
-const MANIFEST_PATH = path.join(__dirname, '../data/images.json')
+const BW_IMAGES_DIR = path.join(__dirname, '../pics_web')
+const BW_MANIFEST_PATH = path.join(__dirname, '../data/images.json')
+const COLOR_IMAGES_DIR = path.join(__dirname, '../pics_web_color')
+const COLOR_MANIFEST_PATH = path.join(__dirname, '../data/images-color.json')
+const COLOR_PUBLIC_LINK = path.join(__dirname, '../public/images-color')
 const DRY_RUN = process.argv.includes('--dry-run')
 
 function slugify(filename) {
@@ -68,14 +71,14 @@ async function convertToWebp(filepath) {
   return webpName
 }
 
-async function main() {
-  const existing = fs.existsSync(MANIFEST_PATH)
-    ? JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'))
+async function processDirectory(imagesDir, manifestPath) {
+  const existing = fs.existsSync(manifestPath)
+    ? JSON.parse(fs.readFileSync(manifestPath, 'utf8'))
     : []
 
   const existingByFilename = Object.fromEntries(existing.map(e => [e.filename, e]))
 
-  const files = fs.readdirSync(IMAGES_DIR)
+  const files = fs.readdirSync(imagesDir)
     .filter(f => /\.(jpe?g|png|webp|avif)$/i.test(f))
     .sort()
 
@@ -85,7 +88,7 @@ async function main() {
     if (/\.webp$/i.test(f)) {
       convertedFiles.push(f)
     } else {
-      const webpName = await convertToWebp(path.join(IMAGES_DIR, f))
+      const webpName = await convertToWebp(path.join(imagesDir, f))
       convertedFiles.push(webpName)
       // Update existing manifest entry if it referenced the old filename
       if (existingByFilename[f]) {
@@ -116,7 +119,7 @@ async function main() {
       continue
     }
 
-    const filepath = path.join(IMAGES_DIR, filename)
+    const filepath = path.join(imagesDir, filename)
     const img = sharp(filepath)
     const meta = await img.metadata()
     const { width, height } = meta
@@ -169,10 +172,26 @@ async function main() {
       console.warn(`  WARN: duplicate IDs detected: ${dupes.join(', ')}`)
     }
 
-    fs.writeFileSync(MANIFEST_PATH, JSON.stringify(all, null, 2))
-    console.log(`Written ${all.length} entries to data/images.json`)
+    fs.writeFileSync(manifestPath, JSON.stringify(all, null, 2))
+    console.log(`Written ${all.length} entries to ${path.relative(path.join(__dirname, '..'), manifestPath)}`)
   } else {
     console.log('Nothing to write.')
+  }
+}
+
+async function main() {
+  console.log('=== Processing B&W images ===')
+  await processDirectory(BW_IMAGES_DIR, BW_MANIFEST_PATH)
+
+  if (fs.existsSync(COLOR_IMAGES_DIR)) {
+    console.log('\n=== Processing color images ===')
+    await processDirectory(COLOR_IMAGES_DIR, COLOR_MANIFEST_PATH)
+
+    // Create public symlink if missing
+    if (!fs.existsSync(COLOR_PUBLIC_LINK)) {
+      fs.symlinkSync(path.resolve(COLOR_IMAGES_DIR), COLOR_PUBLIC_LINK)
+      console.log(`Created symlink: public/images-color → pics_web_color/`)
+    }
   }
 }
 
