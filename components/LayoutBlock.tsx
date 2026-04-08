@@ -4,6 +4,7 @@ import type { ImageEntry, LayoutBlock as LayoutBlockType } from '@/lib/types'
 interface Props {
   block: LayoutBlockType
   onImageClick: (img: ImageEntry) => void
+  imagePrefix: string
 }
 
 // Derive a readable alt from filename: "1 (23).JPG" -> "Photo 23"
@@ -12,11 +13,12 @@ function altFromFilename(filename: string): string {
   return match ? `Photo ${match[1]}` : 'Photograph by Tajuste'
 }
 
-function ImageCard({ img, onClick, sizes, priority }: {
+function ImageCard({ img, onClick, sizes, priority, imagePrefix }: {
   img: ImageEntry
   onClick: () => void
   sizes: string
   priority?: boolean
+  imagePrefix: string
 }) {
   const alt = altFromFilename(img.filename)
   return (
@@ -30,7 +32,7 @@ function ImageCard({ img, onClick, sizes, priority }: {
       aria-label={`View ${alt} in lightbox`}
     >
       <Image
-        src={`/images/${encodeURIComponent(img.filename)}`}
+        src={`${imagePrefix}/${encodeURIComponent(img.filename)}`}
         alt={alt}
         width={img.width}
         height={img.height}
@@ -44,7 +46,7 @@ function ImageCard({ img, onClick, sizes, priority }: {
   )
 }
 
-export default function LayoutBlock({ block, onImageClick }: Props) {
+export default function LayoutBlock({ block, onImageClick, imagePrefix }: Props) {
   const { type, images } = block
 
   if (type === 'chapterBreak') {
@@ -68,6 +70,7 @@ export default function LayoutBlock({ block, onImageClick }: Props) {
           img={img}
           onClick={() => onImageClick(img)}
           sizes="(min-width: 1400px) 1400px, 100vw"
+          imagePrefix={imagePrefix}
         />
       </div>
     )
@@ -82,6 +85,7 @@ export default function LayoutBlock({ block, onImageClick }: Props) {
             img={left}
             onClick={() => onImageClick(left)}
             sizes="(max-width: 768px) 100vw, 50vw"
+            imagePrefix={imagePrefix}
           />
         </div>
         <div className="editorial-pair-item">
@@ -89,6 +93,7 @@ export default function LayoutBlock({ block, onImageClick }: Props) {
             img={right}
             onClick={() => onImageClick(right)}
             sizes="(max-width: 768px) 100vw, 50vw"
+            imagePrefix={imagePrefix}
           />
         </div>
       </div>
@@ -109,6 +114,7 @@ export default function LayoutBlock({ block, onImageClick }: Props) {
             img={img}
             onClick={() => onImageClick(img)}
             sizes="(max-width: 768px) 100vw, 60vw"
+            imagePrefix={imagePrefix}
           />
         </div>
       </div>
@@ -127,6 +133,7 @@ export default function LayoutBlock({ block, onImageClick }: Props) {
             img={first}
             onClick={() => onImageClick(first)}
             sizes="(max-width: 768px) 100vw, 66vw"
+            imagePrefix={imagePrefix}
           />
         </div>
         <div className="editorial-pair-item" style={{ flex: 1 }}>
@@ -134,6 +141,7 @@ export default function LayoutBlock({ block, onImageClick }: Props) {
             img={second}
             onClick={() => onImageClick(second)}
             sizes="(max-width: 768px) 100vw, 33vw"
+            imagePrefix={imagePrefix}
           />
         </div>
       </div>
