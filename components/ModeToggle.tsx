@@ -21,14 +21,16 @@ export default function ModeToggle({ mode, onToggle, disabled }: Props) {
     >
       <svg
         viewBox="0 0 24 24"
-        fill="currentColor"
         xmlns="http://www.w3.org/2000/svg"
       >
-        <path d="M12 2a10 10 0 1 0 0 20 10 10 0 0 0 0-20zm0 1a9 9 0 0 1 0 18 9 9 0 0 1 0-18z" />
-        <path d="M12 3a9 9 0 0 1 0 18c0-4.97 0-13.03 0-18z" />
-        <circle cx="12" cy="7.5" r="1.5" fill="currentColor" />
-        <circle cx="12" cy="16.5" r="1.5" style={{ color: 'var(--bg)' }} fill="currentColor" />
-        <path d="M12 3a4.5 4.5 0 0 1 0 9 4.5 4.5 0 0 0 0 9 9 9 0 0 1 0-18z" />
+        {/* Outer circle */}
+        <circle cx="12" cy="12" r="10.25" fill="none" stroke="currentColor" strokeWidth="1.5" />
+        {/* Dark (right) half: S-curve via two r=5 semicircles + right outer r=10 arc */}
+        <path d="M12 2a5 5 0 0 1 0 10 5 5 0 0 0 0 10 10 10 0 0 1 0-20z" fill="currentColor" />
+        {/* Light dot in dark half */}
+        <circle cx="12" cy="7" r="1.5" fill="var(--bg)" />
+        {/* Dark dot in light half */}
+        <circle cx="12" cy="17" r="1.5" fill="currentColor" />
       </svg>
     </button>
   )
