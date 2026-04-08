@@ -167,7 +167,13 @@ export default function EditorialScroll({ bwImages, colorImages }: Props) {
         ))}
       </div>
 
-      <ModeToggle mode={mode} onToggle={handleToggle} disabled={isAnimating} />
+      <div className="bottom-bar">
+        <a href="mailto:tajuste@gmail.com">e-mail</a>
+        <div className="bar-divider" />
+        <a href="https://instagram.com/tajustephoto" target="_blank" rel="noopener noreferrer">instagram</a>
+        <div className="bar-divider" />
+        <ModeToggle mode={mode} onToggle={handleToggle} disabled={isAnimating} />
+      </div>
 
       <AnimatePresence>
         {lightboxIndex !== null && (

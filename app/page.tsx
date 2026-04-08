@@ -56,11 +56,7 @@ export default function HomePage() {
         </span>
       </footer>
 
-      {/* Fixed contact info */}
-      <div className="contact-bar">
-        <a href="mailto:tajuste@gmail.com">e-mail</a>
-        <a href="https://instagram.com/tajustephoto" target="_blank" rel="noopener noreferrer">instagram</a>
-      </div>
+      {/* Contact + mode toggle rendered by EditorialScroll as unified bottom bar */}
     </main>
   )
 }
