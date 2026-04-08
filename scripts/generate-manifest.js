@@ -51,6 +51,23 @@ async function blurhashToDataUrl(hash, width, height) {
   }
 }
 
+async function convertToWebp(filepath) {
+  const ext = path.extname(filepath).toLowerCase()
+  if (ext === '.webp') return path.basename(filepath)
+
+  const webpName = path.basename(filepath).replace(/\.[^.]+$/, '.webp')
+  const webpPath = path.join(path.dirname(filepath), webpName)
+
+  await sharp(filepath)
+    .webp({ quality: 82 })
+    .toFile(webpPath)
+
+  // Remove original after successful conversion
+  fs.unlinkSync(filepath)
+  console.log(`  ⟶ ${path.basename(filepath)} → ${webpName}`)
+  return webpName
+}
+
 async function main() {
   const existing = fs.existsSync(MANIFEST_PATH)
     ? JSON.parse(fs.readFileSync(MANIFEST_PATH, 'utf8'))
@@ -62,9 +79,28 @@ async function main() {
     .filter(f => /\.(jpe?g|png|webp|avif)$/i.test(f))
     .sort()
 
+  // Convert any non-WebP files to WebP
+  const convertedFiles = []
+  for (const f of files) {
+    if (/\.webp$/i.test(f)) {
+      convertedFiles.push(f)
+    } else {
+      const webpName = await convertToWebp(path.join(IMAGES_DIR, f))
+      convertedFiles.push(webpName)
+      // Update existing manifest entry if it referenced the old filename
+      if (existingByFilename[f]) {
+        existingByFilename[webpName] = { ...existingByFilename[f], filename: webpName }
+        delete existingByFilename[f]
+      }
+    }
+  }
+
+  // Rebuild existing array from updated map
+  const existingUpdated = Object.values(existingByFilename)
+
   // Prune entries whose source files no longer exist
-  const fileSet = new Set(files)
-  const kept = existing.filter(e => fileSet.has(e.filename))
+  const fileSet = new Set(convertedFiles)
+  const kept = existingUpdated.filter(e => fileSet.has(e.filename))
   const pruned = existing.length - kept.length
   if (pruned > 0) {
     console.log(`Pruned ${pruned} entries (source files removed).`)
@@ -74,7 +110,7 @@ async function main() {
   const newEntries = []
   let skipped = 0
 
-  for (const filename of files) {
+  for (const filename of convertedFiles) {
     if (keptByFilename[filename]) {
       skipped++
       continue

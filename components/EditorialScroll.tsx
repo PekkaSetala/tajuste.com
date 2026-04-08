@@ -1,15 +1,48 @@
 'use client'
-import { useState, useCallback, useMemo, useRef } from 'react'
+import { useState, useCallback, useMemo, useRef, useEffect } from 'react'
 import { AnimatePresence } from 'framer-motion'
 import { useSessionSeed } from '@/hooks/useSessionSeed'
 import { seededShuffle } from '@/lib/prng'
 import { buildLayout } from '@/lib/layout'
 import LayoutBlockComponent from '@/components/LayoutBlock'
 import Lightbox from '@/components/Lightbox'
-import type { ImageEntry } from '@/lib/types'
+import type { ImageEntry, LayoutBlock } from '@/lib/types'
 
 interface Props {
   images: ImageEntry[]
+}
+
+// Render blocks only when near the viewport
+function LazyBlock({ block, onImageClick, eager }: {
+  block: LayoutBlock
+  onImageClick: (img: ImageEntry) => void
+  eager: boolean
+}) {
+  const ref = useRef<HTMLDivElement>(null)
+  const [visible, setVisible] = useState(eager)
+
+  useEffect(() => {
+    if (eager || visible) return
+    const el = ref.current
+    if (!el) return
+    const observer = new IntersectionObserver(
+      ([entry]) => { if (entry.isIntersecting) { setVisible(true); observer.disconnect() } },
+      { rootMargin: '600px' }
+    )
+    observer.observe(el)
+    return () => observer.disconnect()
+  }, [eager, visible])
+
+  if (visible) {
+    return <LayoutBlockComponent block={block} onImageClick={onImageClick} />
+  }
+
+  // Placeholder with estimated height to prevent layout shift
+  const estimatedHeight = block.type === 'chapterBreak' ? 80
+    : block.type === 'hero' ? 600
+    : block.type === 'pair' || block.type === 'asymmetricPair' ? 500
+    : 400
+  return <div ref={ref} style={{ minHeight: estimatedHeight }} />
 }
 
 export default function EditorialScroll({ images }: Props) {
@@ -45,10 +78,11 @@ export default function EditorialScroll({ images }: Props) {
   return (
     <>
       {blocks.map((block, i) => (
-        <LayoutBlockComponent
+        <LazyBlock
           key={i}
           block={block}
           onImageClick={openLightbox}
+          eager={i < 4}
         />
       ))}
 
