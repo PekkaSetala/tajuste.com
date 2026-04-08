@@ -3,6 +3,12 @@
 # Usage: npm run deploy
 set -e
 
+# Verify color images symlink exists (created by npm run manifest)
+if [ -d pics_web_color ] && [ ! -L public/images-color ]; then
+  echo "ERROR: public/images-color symlink missing. Run 'npm run manifest' first."
+  exit 1
+fi
+
 echo "=== Building ==="
 npm run build --silent
 
