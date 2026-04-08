@@ -1,4 +1,5 @@
-import images from '@/data/images.json'
+import bwImages from '@/data/images.json'
+import colorImages from '@/data/images-color.json'
 import EditorialScroll from '@/components/EditorialScroll'
 import type { ImageEntry } from '@/lib/types'
 
@@ -25,7 +26,10 @@ export default function HomePage() {
       </header>
 
       {/* Gallery */}
-      <EditorialScroll images={images as ImageEntry[]} />
+      <EditorialScroll
+        bwImages={bwImages as ImageEntry[]}
+        colorImages={colorImages as ImageEntry[]}
+      />
 
       {/* End of gallery */}
       <footer style={{
