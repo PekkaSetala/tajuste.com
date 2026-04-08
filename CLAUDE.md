@@ -21,8 +21,8 @@ hooks/        — useSessionSeed (session-based shuffle)
 styles/       — globals.css (design tokens, mat styles)
 data/         — images.json (B&W manifest), images-color.json (color manifest)
 scripts/      — deploy.sh, sync-private.sh, generate-manifest.js, check-claude-freshness.sh
-pics_web/     — ~185 optimized B&W WebP images (symlinked to public/images)
-pics_web_color/ — ~53 optimized color WebP images (symlinked to public/images-color)
+pics_web/     — ~189 optimized B&W WebP images (symlinked to public/images)
+pics_web_color/ — ~62 optimized color WebP images (symlinked to public/images-color)
 public/images — served B&W images (symlinked from pics_web)
 public/images-color — served color images (symlinked from pics_web_color)
 out/          — static export output
