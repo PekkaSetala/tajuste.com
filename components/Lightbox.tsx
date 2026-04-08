@@ -143,7 +143,7 @@ export default function Lightbox({ images, currentIndex, onNavigate, onClose, im
       const preImg = new window.Image()
       preImg.src = src
     })
-  }, [currentIndex, images])
+  }, [currentIndex, images, imagePrefix])
 
   const handleClick = (e: React.MouseEvent) => {
     if ((e.target as HTMLElement).closest('button')) return

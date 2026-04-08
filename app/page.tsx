@@ -56,7 +56,6 @@ export default function HomePage() {
         </span>
       </footer>
 
-      {/* Contact + mode toggle rendered by EditorialScroll as unified bottom bar */}
     </main>
   )
 }
