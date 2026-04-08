@@ -9,6 +9,7 @@ interface Props {
   currentIndex: number
   onNavigate: (index: number) => void
   onClose: () => void
+  imagePrefix: string
 }
 
 const EASE_OUT: [number, number, number, number] = [0.23, 1, 0.32, 1]
@@ -23,7 +24,7 @@ const controlBase: React.CSSProperties = {
   transition: 'opacity 200ms ease-out',
 }
 
-export default function Lightbox({ images, currentIndex, onNavigate, onClose }: Props) {
+export default function Lightbox({ images, currentIndex, onNavigate, onClose, imagePrefix }: Props) {
   const img = images[currentIndex]
   const touchRef = useRef({ startX: 0, startY: 0, startT: 0 })
   const [controlsVisible, setControlsVisible] = useState(true)
@@ -136,7 +137,7 @@ export default function Lightbox({ images, currentIndex, onNavigate, onClose }: 
       .filter(i => i >= 0 && i < images.length)
 
     toPreload.forEach(i => {
-      const src = `/images/${encodeURIComponent(images[i].filename)}`
+      const src = `${imagePrefix}/${encodeURIComponent(images[i].filename)}`
       if (preloaded.current.has(src)) return
       preloaded.current.add(src)
       const preImg = new window.Image()
@@ -236,7 +237,7 @@ export default function Lightbox({ images, currentIndex, onNavigate, onClose }: 
           }}
         >
           <Image
-            src={`/images/${encodeURIComponent(img.filename)}`}
+            src={`${imagePrefix}/${encodeURIComponent(img.filename)}`}
             alt=""
             fill
             style={{ objectFit: 'contain', padding: 24 }}
