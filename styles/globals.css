@@ -18,6 +18,16 @@
   --pair-gap: 16px;
 }
 
+/* Color mode override — higher specificity via attribute selector */
+:root[data-mode="color"] {
+  --bg: #0a0a0a;
+  --text-primary: #e0ddd8;
+  --text-secondary: #8a8480;
+  --text-link: #a09890;
+  --divider: #2a2725;
+  --bg-glass: rgba(10, 10, 10, 0.85);
+}
+
 @media (max-width: 768px) {
   :root {
     --page-padding: 20px;
@@ -32,6 +42,7 @@ html, body {
   font-family: var(--font-sans);
   -webkit-font-smoothing: antialiased;
   overflow-x: hidden;
+  transition: background-color 400ms cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 body {
@@ -171,5 +182,53 @@ img {
     left: 50%;
     transform: translateX(-50%);
     bottom: 12px;
+  }
+}
+
+/* Mode toggle — yin/yang icon */
+.mode-toggle {
+  position: fixed;
+  bottom: 20px;
+  right: var(--page-padding);
+  z-index: 50;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 8px;
+  color: var(--text-secondary);
+  transition: color 200ms ease;
+  -webkit-tap-highlight-color: transparent;
+}
+
+.mode-toggle:active {
+  transform: scale(0.97);
+}
+
+.mode-toggle:focus-visible {
+  outline: 2px solid var(--text-secondary);
+  outline-offset: 4px;
+}
+
+.mode-toggle svg {
+  display: block;
+  width: 28px;
+  height: 28px;
+  transition: transform 500ms cubic-bezier(0.23, 1, 0.32, 1);
+}
+
+.mode-toggle[data-mode="color"] svg {
+  transform: rotate(180deg);
+}
+
+@media (hover: hover) and (pointer: fine) {
+  .mode-toggle:hover {
+    color: var(--text-primary);
+  }
+}
+
+@media (max-width: 768px) {
+  .mode-toggle {
+    bottom: 56px;
+    right: 20px;
   }
 }
