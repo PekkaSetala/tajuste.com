@@ -65,7 +65,7 @@ export default function LayoutBlock({ block, onImageClick, imagePrefix }: Props)
   if (type === 'hero') {
     const img = images[0]
     return (
-      <div style={{ padding: '0 var(--page-padding)', marginBottom: 'var(--block-gap)', lineHeight: 0, maxWidth: 1400, marginLeft: 'auto', marginRight: 'auto' }}>
+      <div className="hero-block">
         <ImageCard
           img={img}
           onClick={() => onImageClick(img)}

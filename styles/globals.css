@@ -85,6 +85,30 @@ img {
   }
 }
 
+/* Hero block — full-width single image */
+.hero-block {
+  display: flex;
+  justify-content: center;
+  padding: 0 var(--page-padding);
+  margin-bottom: var(--block-gap);
+  line-height: 0;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.hero-block .image-mat {
+  max-width: 100%;
+  width: fit-content;
+}
+
+.hero-block img {
+  max-height: 85vh;
+  width: auto;
+  max-width: 100%;
+  object-fit: contain;
+}
+
 /* Editorial layout responsive */
 .editorial-pair {
   display: flex;
